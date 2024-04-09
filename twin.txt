@@ -1,0 +1,12 @@
+anf=a+c+d+ae+be+af+bf+cf+aef+bg+cg+dg+aeg+deg+afg+bfg+dfg+aefg+ah+bh+dh+aeh+deh+bfh+cfh+cefh+defh+cgh+dgh+cegh+degh+cfgh+dfgh
+anf=b+d+ce+af+bf+cf+df+aef+def+ag+dg+beg+ceg+afg+bfg+aefg+befg+ch+dh+beh+ceh+deh+cfh+befh+cefh+defh+agh+bgh+dgh+aegh+begh+bfgh+cfgh+dfgh
+anf=b+d+ce+af+aef+bef+cef+ag+dg+beg+ceg+afg+cfg+dfg+aefg+cefg+defg+ch+dh+beh+ceh+deh+bfh+dfh+cefh+agh+bgh+cgh+dgh+aegh+degh+cfgh
+anf=b+c+be+de+af+df+aef+bef+cef+def+ag+bg+aeg+beg+deg+bfg+cfg+dfg+aefg+ah+bh+ch+aeh+beh+afh+aefh+agh+aegh+bfgh+cfgh+dfgh
+anf=a+c+d+ae+be+af+cf+cef+def+bg+deg+bfg+cfg+befg+cefg+defg+ah+bh+ch+aeh+beh+ceh+deh+cfh+defh+bgh+dgh+aegh+begh+cegh+afgh+cfgh
+anf=a+b+c+d+ae+be+de+af+cf+aef+def+ag+bg+aeg+afg+bfg+cfg+befg+cefg+defg+bh+aeh+beh+ceh+bfh+dfh+cefh+defh+agh+bgh+dgh+aegh+bfgh+dfgh
+anf=a+c+be+de+bf+cf+df+aef+cef+ag+bg+cg+aeg+beg+ceg+deg+bfg+defg+ah+ch+dh+aeh+beh+deh+afh+bfh+dfh+aefh+defh+bgh+cgh+dgh+aegh+cegh+afgh+cfgh
+anf=ae+af+cf+df+bef+def+bg+dg+aeg+ceg+cfg+dfg+aefg+befg+cefg+ah+bh+ch+dh+aeh+beh+ceh+afh+cfh+aefh+befh+cefh+defh+agh+dgh+begh+degh
+anf=b+be+de+cf+aef+cef+cg+dg+aeg+deg+bfg+cfg+aefg+cefg+bh+aeh+afh+bfh+cfh+aefh+defh+agh+cgh+dgh+begh+cegh+bfgh+cfgh+dfgh
+anf=b+be+de+cf+aef+cef+bg+aeg+beg+ceg+dfg+aefg+befg+defg+ch+dh+aeh+beh+ceh+deh+afh+dfh+aefh+befh+cefh+agh+cgh+dgh+begh+cegh+bfgh+cfgh+dfgh
+anf=b+be+de+cf+aef+cef+cg+dg+eg+aeg+deg+bfg+cfg+aefg+cefg+bh+aeh+afh+bfh+cfh+aefh+defh+agh+cgh+dgh+begh+cegh+bfgh+cfgh+dfgh
+anf=b+be+de+cf+aef+cef+bg+eg+aeg+beg+ceg+dfg+aefg+befg+defg+ch+dh+aeh+beh+ceh+deh+afh+dfh+aefh+befh+cefh+agh+cgh+dgh+begh+cegh+bfgh+cfgh+dfgh
