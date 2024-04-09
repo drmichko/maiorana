@@ -145,17 +145,17 @@ int invj(boole f)
 	Fourier(ts, ffsize);
 	for (x = 0; x < ffsize; x++)
 	    ts[x] = abs(ts[x]);
-	val = findtable(ts, ffsize, &rootJ, &countJs, 0);
+	val = findtable(ts, ffsize, &rootj, &countjs, 0);
 	if (verb > 1 && nouvelle)
-	    printf("\ncountjs : %d\n", countJs);
+	    printf("\ncountjs : %d\n", countjs);
 	assert(val < MAXP);
 	tp[val]++;
 
     }
-    res = findspltable(tp, MAXP, &rootJ, &countJ);
+    res = findspltable(tp, MAXP, &rootj, &countj);
 
     if (verb && nouvelle)
-	printf("\ncountj : %d\n", countJ);
+	printf("\ncountj : %d\n", countj);
     return res;
 }
 
@@ -377,9 +377,12 @@ int main(int argc, char *argv[])
 {
 
 
-    int opt, optstab = 0, optdeg = 0, optj = 0, optJ = 0, optB = 0, optK =
+    int opt, optdeg = 0, optj = 0, optJ = 0, optB = 0, optK =
 	0, optD = 0, optR = 0, optn = 0i, optQ =  0;
     char *file = NULL;
+
+void *root = NULL;
+int   count = 0;
 
     while ((opt = getopt(argc, argv, "df:vhjJBDRK:n:Q")) != -1) {
 	switch (opt) {
@@ -431,11 +434,12 @@ int main(int argc, char *argv[])
     if ( optQ || optJ ) Prepare();
     int R[12];
     boole f;
-    int total = 0, item = 0;
+    int total = 0;
     FILE *src = fopen(file, "r");
     int nbi;
     while ((f = loadBoole(src))) {
 	total++;
+	projboole(2, ffdimen, f );
 	if (! optn  || line[total] == 1) {
 	    nbi = 0;
 	    if (verb > 1)
@@ -456,19 +460,20 @@ int main(int argc, char *argv[])
 		R[nbi++] = invR(f);
 	    if (optQ)
 		R[nbi++] = invQ(f);
-	    item++;
-	    findspltable(R, nbi, &rootj, &countj);
+	    int val = findspltable(R, nbi, &root, &count);
 	    if ( nouvelle ){
-		printf("\nnew countj=%d %d", countj, total);
+		printf("\nnew countj=%d %d", count, total);
 	    }
 	    if ( verb ){
-		printf("\ncountj=%d num=%d", countj, total );
+		printf("\nitem : %d invariant : %d ", total, val );
+		panf( stdout, f );
 	    }
 	}
     }
     fclose(src);
-    printf("\nitems  : %d / %d ", item, total);
-    printf(" class number : %d  using %d invariants\n", countj, nbi );
+    printf("\n#class number : %d  using %d invariants\n", count, nbi );
+    if (optj)
+	printf("\ncountj : %d ( %d ) \n", countj, countjs);
     if (optJ)
 	printf("\ncountJ : %d ( %d ) \n", countJ, countJs);
     if (optB)
