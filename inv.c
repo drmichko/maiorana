@@ -132,7 +132,7 @@ int invB(boole f)
     return res;
 }
 
-int invj(boole f)
+int invj( boole f)
 {
     int q;
     int res, val;
@@ -373,24 +373,38 @@ void numline(char *s)
     }
 }
 
+boole duale( boole f )
+{ int tfr[ ffsize ] ;
+	int x;
+	for( x = 0 ; x < ffsize; x++ )
+		tfr[x] = f[x] ? -1: +1;
+	Fourier( tfr, ffsize );
+  boole g = getboole();
+  for( x = 0 ; x < ffsize; x++ )
+	  g[x] = ( tfr[x] > 0 );
+  return g;
+}
 int main(int argc, char *argv[])
 {
 
 
     int opt, optdeg = 0, optj = 0, optJ = 0, optB = 0, optK =
-	0, optD = 0, optR = 0, optn = 0i, optQ =  0;
+	0, optD = 0, optR = 0, optn = 0i, optQ =  0, optdual = 0;
     char *file = NULL;
 
 void *root = NULL;
 int   count = 0;
 
-    while ((opt = getopt(argc, argv, "df:vhjJBDRK:n:Q")) != -1) {
+    while ((opt = getopt(argc, argv, "tdf:vhjJBDRK:n:Q")) != -1) {
 	switch (opt) {
 	case 'd':
 	    optdeg = 1;
 	    break;
 	case 'j':
 	    optj = 1;
+	    break;
+	case 't':
+	    optdual = 1;
 	    break;
 	case 'J':
 	    optJ = 1;
@@ -433,33 +447,49 @@ int   count = 0;
     if ( optJ || optj || optB ) prepare();
     if ( optQ || optJ ) Prepare();
     int R[12];
-    boole f;
+    boole f, g;
     int total = 0;
     FILE *src = fopen(file, "r");
     int nbi;
     while ((f = loadBoole(src))) {
 	total++;
 	projboole(2, ffdimen, f );
+	g = duale( f );
+	projboole(2, ffdimen, g );
 	if (! optn  || line[total] == 1) {
 	    nbi = 0;
 	    if (verb > 1)
 		panf(stdout, f);
 	    if (optdeg)
 		R[nbi++] = degree(f);
+	    if (optdeg &&  optdual )
+		R[nbi++] = degree(g);
 	    if (optj)
 		R[nbi++] = invj(f);
+	    if (optj && optdual )
+		R[nbi++] = invj(g);
 	    if (optJ)
 		R[nbi++] = invJ(f);
+	    if (optJ && optdual )
+		R[nbi++] = invJ(g);
 	    if (optB)
 		R[nbi++] = invB(f);
 	    if (optK)
 		R[nbi++] = invK(f, optK);
+	    if (optK && optdual )
+		R[nbi++] = invK(g, optK);
 	    if (optD)
 		R[nbi++] = invD(f);
+	    if (optD && optdual )
+		R[nbi++] = invD(g);
 	    if (optR)
 		R[nbi++] = invR(f);
+	    if (optR && optdual )
+		R[nbi++] = invR(g);
 	    if (optQ)
 		R[nbi++] = invQ(f);
+	    if (optQ  && optdual )
+		R[nbi++] = invQ(g);
 	    int val = findspltable(R, nbi, &root, &count);
 	    if ( nouvelle ){
 		printf("\nnew countj=%d %d", count, total);
@@ -468,6 +498,8 @@ int   count = 0;
 		printf("\nitem : %d invariant : %d ", total, val );
 		panf( stdout, f );
 	    }
+	    free(f);
+	    free(g);
 	}
     }
     fclose(src);
