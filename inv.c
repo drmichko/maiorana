@@ -83,7 +83,7 @@ int countK = 0;
 
 int invK(boole f, int r)
 {
-    code cc = rmcode(1, r, ffdimen);
+    code cc = rmcode(0, r, ffdimen);
     code prd = multicode(cc, f);
     int k;
     for (k = 0; k < prd.nbl; k++)
@@ -188,37 +188,6 @@ int invJ(boole f)
 	printf("\ncountJ : %d\n", countJ);
     return res;
 }
-void *rootQ = NULL;
-int countQ = 0;
-void *rootQs = NULL;
-int countQs = 0;
-#define MAXQ 512
-int invQ(boole f)
-{
-    int q;
-    int res, val;
-    int ts[ffsize];
-    int tp[MAXQ] = { 0 };
-    for (q = 0; q < NBIG; q++) {
-	int x;
-	for (x = 0; x < ffsize; x++)
-	    ts[x] = f[x] ^ QuadRk4[q][x] ? -1 : +1;
-	Fourier(ts, ffsize);
-	for (x = 0; x < ffsize; x++)
-	    ts[x] = abs(ts[x]);
-	val = findtable(ts, ffsize, &rootQs, &countQs, 0);
-	if (verb > 1 && nouvelle)
-	    printf("\ncountQs : %d\n", countQs);
-	assert(val < MAXQ);
-	tp[val]++;
-
-    }
-    res = findspltable(tp, MAXQ, &rootQ, &countQ);
-
-    if (verb && nouvelle)
-	printf("\ncountJ : %d\n", countQ);
-    return res;
-}
 int invjold(boole f)
 {
     int q;
@@ -297,6 +266,31 @@ int mydegree(boole f, int ffsize)
     return (d);
 }
 
+boole duale( boole f )
+{ int tfr[ ffsize ] ;
+	int x;
+	for( x = 0 ; x < ffsize; x++ )
+		tfr[x] = f[x] ? -1: +1;
+	Fourier( tfr, ffsize );
+  boole g = getboole();
+  for( x = 0 ; x < ffsize; x++ )
+	  g[x] = ( tfr[x] > 0 );
+  return g;
+}
+
+int L( boole f, int q )
+{ int tfr[ ffsize ] ;
+	int res = 0;
+	int x;
+	for( x = 0 ; x < q; x++ )
+		tfr[x] = f[x] ? -1: +1;
+	Fourier( tfr, q );
+  for( x = 0 ; x < ffsize; x++ )
+	  res += f[x]*f[x]*f[x]*f[x];
+  return res;
+}
+
+
 int invR(boole f)
 {
     shortvec u, p, msk, x, y, w;
@@ -321,19 +315,19 @@ int invR(boole f)
 	    F[x] = f[y];
 	    G[x] = f[y ^ p];
 	}
-
-	/*for( x = 0 ; x < ffsize/2  ; x++ )
+	/*
+	for( x = 0 ; x < ffsize/2  ; x++ )
 	   ts[x] = F[ x ] ? -1 : +1;
-	   Fourier( ts, ffsize/2 );
-	   t[0]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 0 );
+	Fourier( ts, ffsize/2 );
+	t[0]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 0 );
 
-	   for( x = 0 ; x < ffsize/2  ; x++ )
+	for( x = 0 ; x < ffsize/2  ; x++ )
 	   ts[x] = G[ x ] ? -1 : +1;
-	   Fourier( ts, ffsize/2 );
-	   t[1]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 0 );
-	 */
-	t[0] = mydegree(F, ffsize / 2);
-	t[1] = mydegree(G, ffsize / 2);
+	 Fourier( ts, ffsize/2 );
+	 t[1]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 0 );
+	*/
+	t[0] = L(F, ffsize / 2);
+	t[1] = L(G, ffsize / 2);
 	if (t[0] < t[1]) {
 	    tmp = t[0];
 	    t[0] = t[1];
@@ -346,7 +340,7 @@ int invR(boole f)
     free(F);
     free(G);
 
-    tmp = findtable(tp, ffsize, &rootR, &countR, 0);
+    tmp = findtable(tp, ffsize, &rootR, &countR, 1);
     if (verb && nouvelle)
 	printf("\ncountR : %d (%d)\n", countR, countRs);
     free(ts);
@@ -373,17 +367,6 @@ void numline(char *s)
     }
 }
 
-boole duale( boole f )
-{ int tfr[ ffsize ] ;
-	int x;
-	for( x = 0 ; x < ffsize; x++ )
-		tfr[x] = f[x] ? -1: +1;
-	Fourier( tfr, ffsize );
-  boole g = getboole();
-  for( x = 0 ; x < ffsize; x++ )
-	  g[x] = ( tfr[x] > 0 );
-  return g;
-}
 int main(int argc, char *argv[])
 {
 
@@ -464,32 +447,35 @@ int   count = 0;
 		R[nbi++] = degree(f);
 	    if (optdeg &&  optdual )
 		R[nbi++] = degree(g);
+	    
 	    if (optj)
 		R[nbi++] = invj(f);
 	    if (optj && optdual )
 		R[nbi++] = invj(g);
+
 	    if (optJ)
 		R[nbi++] = invJ(f);
 	    if (optJ && optdual )
 		R[nbi++] = invJ(g);
+	    
 	    if (optB)
 		R[nbi++] = invB(f);
+
 	    if (optK)
 		R[nbi++] = invK(f, optK);
 	    if (optK && optdual )
 		R[nbi++] = invK(g, optK);
+
 	    if (optD)
 		R[nbi++] = invD(f);
 	    if (optD && optdual )
 		R[nbi++] = invD(g);
+	    
 	    if (optR)
 		R[nbi++] = invR(f);
 	    if (optR && optdual )
 		R[nbi++] = invR(g);
-	    if (optQ)
-		R[nbi++] = invQ(f);
-	    if (optQ  && optdual )
-		R[nbi++] = invQ(g);
+
 	    int val = findspltable(R, nbi, &root, &count);
 	    if ( nouvelle ){
 		printf("\nnew countj=%d %d", count, total);
@@ -516,7 +502,5 @@ int   count = 0;
 	printf("\ncountK: %d ( %d ) \n", countK, optK);
     if (optR)
 	printf("\ncountR: %d ( %d ) \n", countR, countRs);
-    if (optQ)
-	printf("\ncountR: %d ( %d ) \n", countQ, countQs);
     return 0;
 }
