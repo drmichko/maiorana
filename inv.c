@@ -98,11 +98,51 @@ int invK(boole f, int r)
     return res;
 }
 
-void *rootB = NULL;
-int countB = 0;
-void *rootBs = NULL;
-int countBs = 0;
-int invB(boole f)
+void *rootX = NULL;
+void *rootXs = NULL;
+int countX = 0, countXs = 0;
+
+int invX(boole f, int r)
+{
+    code cc = rmcode(0, r, ffdimen);
+    code prd = multicode(cc, f);
+    int k;
+    for (k = 0; k < prd.nbl; k++)
+        projboole(r + 2, r + 4, prd.fct[k]);
+    int res = pivotage(prd);
+
+    boole fct = getboole();
+    int ts[ffsize];
+    int limite = 1 << res;
+    int iter = 1;
+    int* tp = calloc( limite, sizeof(int) );
+    while (iter < limite ) {
+            int i = __builtin_ctz(iter);
+	    int x;
+            for( x = 0; x < ffsize; x++ )
+		    fct[x] ^= prd.fct[i][x]; 
+            for( x = 0; x < ffsize; x++ )
+		    ts[x] = fct[x] ? -1 : +1;
+	    int val = findtable( ts, ffsize, &rootXs, &countXs, 1);
+            tp[ iter ] = val;
+            iter++;
+        }
+
+     //res = findtable(tp, limite, &rootX, &countX, 0);
+     free( fct );
+     free( tp );
+    freecode(cc);
+    freecode(prd);
+    return res;
+}
+
+
+void *rootb = NULL;
+int countb = 0;
+void *rootbs = NULL;
+int countbs = 0;
+
+int invb(boole f)
 {
     int q;
     int res, val;
@@ -113,24 +153,60 @@ int invB(boole f)
 	int x;
 	for (x = 0; x < ffsize; x++)
 	    tmp[x] = f[x] && QuadRk2[q][x];
-	projboole(5, 6, tmp);
+	projboole(6, 6, tmp);
 	for (x = 0; x < ffsize; x++)
 	    ts[x] = tmp[x] ? -1 : 1;
 	Fourier(ts, ffsize);
 	for (x = 0; x < ffsize; x++)
 	    ts[x] = abs(ts[x]);
-	val = findtable(ts, ffsize, &rootBs, &countBs, 0);
+	val = findtable(ts, ffsize, &rootbs, &countbs, 0);
 	if (verb > 1 && nouvelle)
-	    printf("\ncountJs : %d\n", countBs);
+	    printf("\ncountJs : %d\n", countbs);
 	tp[q] = val;
+
+    }
+    res = findtable(tp, NBALS, &rootb, &countb, 0);
+
+    if (verb && nouvelle)
+	printf("\ncountb : %d\n", countb);
+    return res;
+}
+
+void *rootB = NULL;
+int countB = 0;
+void *rootBs = NULL;
+int countBs = 0;
+
+int invB4(boole f)
+{
+    int q;
+    int res, val;
+    int ts[ffsize];
+    uchar tmp[ffsize];
+    int tp[NBALS] = { 0 };
+    for (q = 0; q < NBALS; q++) {
+        int x;
+        for (x = 0; x < ffsize; x++)
+            tmp[x] = f[x] && QuadRk2[q][x];
+        projboole(6, 6, tmp);
+        for (x = 0; x < ffsize; x++)
+            ts[x] = tmp[x] ? -1 : 1;
+        Fourier(ts, ffsize);
+        for (x = 0; x < ffsize; x++)
+            ts[x] = abs(ts[x]);
+        val = findtable(ts, ffsize, &rootBs, &countBs, 0);
+        if (verb > 1 && nouvelle)
+            printf("\ncountJs : %d\n", countBs);
+        tp[q] = val;
 
     }
     res = findtable(tp, NBALS, &rootB, &countB, 0);
 
     if (verb && nouvelle)
-	printf("\ncountb : %d\n", countB);
+        printf("\ncountb : %d\n", countB);
     return res;
 }
+
 
 int invj( boole f)
 {
@@ -315,19 +391,17 @@ int invR(boole f)
 	    F[x] = f[y];
 	    G[x] = f[y ^ p];
 	}
-	/*
+	
 	for( x = 0 ; x < ffsize/2  ; x++ )
 	   ts[x] = F[ x ] ? -1 : +1;
-	Fourier( ts, ffsize/2 );
-	t[0]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 0 );
+	//Fourier( ts, ffsize/2 );
+	t[0]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 1 );
 
 	for( x = 0 ; x < ffsize/2  ; x++ )
 	   ts[x] = G[ x ] ? -1 : +1;
-	 Fourier( ts, ffsize/2 );
-	 t[1]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 0 );
-	*/
-	t[0] = L(F, ffsize / 2);
-	t[1] = L(G, ffsize / 2);
+	 //Fourier( ts, ffsize/2 );
+	 t[1]  = findtable( ts, ffsize/2,  &rootRs, &countRs, 1 );
+
 	if (t[0] < t[1]) {
 	    tmp = t[0];
 	    t[0] = t[1];
@@ -371,14 +445,14 @@ int main(int argc, char *argv[])
 {
 
 
-    int opt, optdeg = 0, optj = 0, optJ = 0, optB = 0, optK =
-	0, optD = 0, optR = 0, optn = 0i, optQ =  0, optdual = 0;
+    int opt, optdeg = 0, optj = 0, optJ = 0, optB = 0, optb = 0, \
+    optK = 0, optD = 0, optR = 0, optn = 0, optX = 0, optQ =  0, optdual = 0;
     char *file = NULL;
 
 void *root = NULL;
 int   count = 0;
 
-    while ((opt = getopt(argc, argv, "tdf:vhjJBDRK:n:Q")) != -1) {
+    while ((opt = getopt(argc, argv, "tdf:vhjJbBDRK:X:n:Q")) != -1) {
 	switch (opt) {
 	case 'd':
 	    optdeg = 1;
@@ -398,6 +472,9 @@ int   count = 0;
 	case 'B':
 	    optB = 1;
 	    break;
+	case 'b':
+	    optb = 1;
+	    break;
 	case 'D':
 	    optD = 1;
 	    break;
@@ -410,6 +487,9 @@ int   count = 0;
 	    break;
 	case 'K':
 	    optK = atoi(optarg);
+	    break;
+	case 'X':
+	    optX = atoi(optarg);
 	    break;
 	case 'f':
 	    file = strdup(optarg);
@@ -427,8 +507,8 @@ int   count = 0;
 
     initboole(8);
     initagldim(8);
-    if ( optJ || optj || optB ) prepare();
-    if ( optQ || optJ ) Prepare();
+    if ( optJ || optj || optb ) prepare();
+    if ( optQ || optJ || optB ) Prepare();
     int R[12];
     boole f, g;
     int total = 0;
@@ -458,13 +538,21 @@ int   count = 0;
 	    if (optJ && optdual )
 		R[nbi++] = invJ(g);
 	    
-	    if (optB)
-		R[nbi++] = invB(f);
+	    if (optb)
+		R[nbi++] = invb(f);
+
+	    if (optb && optdual )
+		R[nbi++] = invb( g );
 
 	    if (optK)
 		R[nbi++] = invK(f, optK);
 	    if (optK && optdual )
 		R[nbi++] = invK(g, optK);
+
+	    if (optX)
+		R[nbi++] = invX(f, optX);
+	    if (optK && optdual )
+		R[nbi++] = invX(g, optX);
 
 	    if (optD)
 		R[nbi++] = invD(f);
@@ -484,9 +572,9 @@ int   count = 0;
 		printf("\nitem : %d invariant : %d ", total, val );
 		panf( stdout, f );
 	    }
+	}
 	    free(f);
 	    free(g);
-	}
     }
     fclose(src);
     printf("\n#class number : %d  using %d invariants\n", count, nbi );
@@ -500,6 +588,8 @@ int   count = 0;
 	printf("\ncountD : %d ( %d ) \n", countD, countDs);
     if (optK)
 	printf("\ncountK: %d ( %d ) \n", countK, optK);
+    if (optX)
+	printf("\ncountX: %d ( %d ) \n", countX, optX);
     if (optR)
 	printf("\ncountR: %d ( %d ) \n", countR, countRs);
     return 0;
